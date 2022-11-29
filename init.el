@@ -136,6 +136,13 @@
   :config (setq shell-pop-shell-type '("eshell" "*eshell*" (lambda () (eshell))))
   (global-set-key (kbd "C-c o") 'shell-pop))
 
+;; fish mode
+(leaf fish-mode
+  :ensure t
+  :setq
+  (fish-enable-auto-indent . t)
+  :mode ("\\.fish$"))
+
 ;; 括弧自動補完
 (leaf smartparens
   :doc "Automatic insertion, wrapping and paredit-like navigation with user defined pairs."
@@ -245,7 +252,7 @@
           ("C-p" . company-select-previous)))
   :custom ((company-tooltip-limit         . 12)
            (company-idle-delay            . 0) ;; 補完の遅延なし
-           (company-minimum-prefix-length . 1) ;; 1文字から補完開始
+           (company-minimum-prefix-length . 2) ;; 1文字から補完開始
            (company-transformers          . '(company-sort-by-occurrence))
            (global-company-mode           . t)
            (company-selection-wrap-around . t)))
@@ -289,6 +296,57 @@
       :hook
       ((company-mode-hook . set-yas-as-company-backend))
       )
+
+;; docker tramp
+(leaf docker-tramp
+  :doc "TRAMP integration for docker containers"
+  :req "emacs-24" "cl-lib-0.5"
+  :tag "convenience" "docker" "emacs>=24"
+  :url "https://github.com/emacs-pe/docker-tramp.el"
+  :added "2022-11-30"
+  :emacs>= 24
+  :ensure t)
+
+;; LSP
+(leaf lsp-mode
+  :ensure t
+  :commands (lsp lsp-deferred)
+  :config
+  :custom ((lsp-keymap-prefix                  . "C-c l")
+           (lsp-log-io                         . t)
+           (lsp-keep-workspace-alive           . nil)
+           (lsp-document-sync-method           . 2)
+           (lsp-response-timeout               . 5)
+           (lsp-enable-file-watchers           . nil))
+  :hook (lsp-mode-hook . lsp-headerline-breadcrumb-mode)
+  :init (leaf lsp-ui
+          :ensure t
+          :after lsp-mode
+          :custom ((lsp-ui-doc-enable            . t)
+                   (lsp-ui-doc-position          . 'at-point)
+                   (lsp-ui-doc-header            . t)
+                   (lsp-ui-doc-include-signature . t)
+                   (lsp-ui-doc-max-width         . 150)
+                   (lsp-ui-doc-max-height        . 30)
+                   (lsp-ui-doc-use-childframe    . nil)
+                   (lsp-ui-doc-use-webkit        . nil)
+                   (lsp-ui-peek-enable           . t)
+                   (lsp-ui-peek-peek-height      . 20)
+                   (lsp-ui-peek-list-width       . 50))
+          :bind ((lsp-ui-mode-map ([remap xref-find-definitions] .
+                                   lsp-ui-peek-find-definitions)
+                                  ([remap xref-find-references] .
+                                   lsp-ui-peek-find-references))
+                 (lsp-mode-map ("C-c s" . lsp-ui-sideline-mode)
+                               ("C-c d" . lsp-ui-doc-mode)))
+          :hook ((lsp-mode-hook . lsp-ui-mode))))
+
+;; LSP python
+(leaf lsp-pyright
+  :ensure t
+  :hook (python-mode-hook . (lambda ()
+                              (require 'lsp-pyright)
+                              (lsp-deferred))))
 
 (provide 'init)
 

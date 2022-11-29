@@ -4,3 +4,11 @@ lazygit
 ls
 ls
 ld
+git add -A
+git commit -m "add:パッケージ追加"
+git push
+ks
+ls 
+ls 
+pwd 
+npm install -g pyright
